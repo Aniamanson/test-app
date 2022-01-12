@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <AddNewItem />
-    <ItemsList />
+    <ItemsList :products="products" />
   </div>
 </template>
 
@@ -15,6 +15,12 @@ export default {
     AddNewItem,
     ItemsList,
   },
+  computed: {
+    products() {
+      console.log(this.$store.state.products);
+      return this.$store.state.products;
+    },
+  },
 };
 </script>
 
@@ -24,5 +30,6 @@ export default {
   display: flex;
   height: 100vh;
   padding: 32px;
+  overflow: auto;
 }
 </style>

@@ -14,7 +14,9 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 .item-add {
-  max-width: 332px;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 332px;
   margin-right: 16px;
 
   &__form {
