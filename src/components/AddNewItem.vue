@@ -19,6 +19,12 @@ export default {
   flex: 1 0 332px;
   margin-right: 16px;
 
+  &__title {
+    font-weight: 600;
+    font-size: 28px;
+    line-height: 35px;
+  }
+
   &__form {
     background: #fffefb;
     box-shadow: 0px 20px 30px rgba(0, 0, 0, 0.04),

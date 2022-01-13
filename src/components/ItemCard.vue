@@ -15,9 +15,7 @@
 export default {
   name: 'ItemCard',
   props: ['product'],
-  data: () => ({
-    color: '#73B6EA',
-  }),
+  data: () => ({}),
   computed: {
     priceComputed() {
       return this.product.price.toLocaleString('ru-RU');
