@@ -64,6 +64,13 @@ export default {
   height: 100vh;
   padding: 32px;
   overflow: auto;
+
+  @media (max-width: 950px) {
+    flex-direction: column;
+  }
+  @media (max-width: 430px) {
+    padding: 32px 15px;
+  }
 }
 
 .main {
@@ -73,10 +80,19 @@ export default {
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.5s;
+  transition: opacity 0.8s;
 }
 .fade-enter,
 .fade-leave-to {
+  opacity: 0;
+}
+
+.component-fade-enter-active,
+.component-fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.component-fade-enter, .component-fade-leave-to
+/* .component-fade-leave-active до версии 2.1.8 */ {
   opacity: 0;
 }
 </style>
