@@ -1,6 +1,6 @@
 <template>
   <div class="item-card">
-    <div class="item-card__delete" @click="deleteProduct">
+    <div class="item-card__delete" @click="deleteProduct(product.title)">
       <img src="img/delete.svg" alt="удалить товар" />
     </div>
     <div class="item-card__img">
@@ -15,6 +15,8 @@
 </template>
 
 <script>
+import eventBus from '@/eventBus';
+
 export default {
   name: 'ItemCard',
   props: ['product'],
@@ -25,8 +27,9 @@ export default {
     },
   },
   methods: {
-    deleteProduct() {
-      this.$store.commit('deleteProduct', this.product.title);
+    deleteProduct(productTitle) {
+      eventBus.$emit('deleteProduct', productTitle);
+      // this.$store.commit('deleteProduct', this.product.title);
     },
   },
 };

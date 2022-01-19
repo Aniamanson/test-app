@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 <template>
   <div class="item-add">
     <h1 class="item-add__title">Добавление товара</h1>
@@ -10,16 +11,11 @@
             placeholder="Введите наименование товара"
             name="title"
             class="form__input input"
-            :class="{
-              error: errorList.title.value || errorList.title.required,
-            }"
+            :class="{ error: msg.title }"
             v-model.trim="form.title"
           />
-          <span class="form__error" v-if="errorList.title.required">
-            {{ errors.required }}
-          </span>
-          <span class="form__error" v-else-if="errorList.title.value">
-            {{ errors.title }}
+          <span class="form__error" v-if="msg.title">
+            {{ msg.title }}
           </span>
         </label>
       </div>
@@ -44,14 +40,11 @@
             placeholder="Введите ссылку"
             name="img"
             class="form__input input"
-            :class="{ error: errorList.img.value || errorList.img.required }"
+            :class="{ error: msg.img }"
             v-model.trim="form.img"
           />
-          <span class="form__error" v-if="errorList.img.required">
-            {{ errors.required }}
-          </span>
-          <span class="form__error" v-else-if="errorList.img.value">
-            {{ errors.error }}
+          <span class="form__error" v-if="msg.img">
+            {{ msg.img }}
           </span>
         </label>
       </div>
@@ -63,11 +56,11 @@
             placeholder="Введите цену"
             name="price"
             class="form__input input"
-            :class="{ error: errorList.price.required }"
+            :class="{ error: msg.price }"
             v-model="form.price"
           />
-          <span class="form__error" v-if="errorList.price.required">
-            {{ errors.required }}
+          <span class="form__error" v-if="msg.price">
+            {{ msg.price }}
           </span>
         </label>
       </div>
@@ -83,8 +76,6 @@
 </template>
 
 <script>
-import errors from '../errors';
-
 export default {
   name: 'AddNewItem',
   data: () => ({
@@ -94,71 +85,77 @@ export default {
       img: '',
       price: '',
     },
-    errorList: {
-      title: {
-        value: false,
-        required: false,
-      },
-      img: {
-        value: false,
-        required: false,
-      },
-      price: {
-        value: false,
-        required: false,
-      },
+    msg: {},
+    inValidObj: {
+      title: true,
+      img: true,
+      price: true,
     },
     invalidForm: true,
   }),
-  computed: {
-    errors() {
-      return errors;
-    },
-  },
+
   methods: {
-    isValid() {
-      const inputs = Object.keys(this.form);
-      inputs.forEach((input) => {
-        this.errorList[input].value = true;
-        this.errorList[input].required = true;
-
-        if (input === '') {
-          this.errorList[input].required = true;
+    validateTitle(val) {
+      if (val !== '') {
+        const exist = this.$store.state.products.find((item) => item.title === val);
+        if (exist) {
+          this.msg.title = 'Данный товар уже добавлен';
         } else {
-          this.errorList[input].required = false;
+          this.msg.title = '';
         }
-        if (input === 'price') {
-          this.form.price = this.form.price.replace(/[^0-9]/g, '');
-          this.form.price = this.form.price.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-        } else if (input === 'img') {
-          if (this.errors.img.test(this.form.img) === false) {
-            this.errorList.img.value = true;
-          } else {
-            this.errorList.img.value = false;
-          }
-        } else if (input === 'title') {
-          const exist = this.$store.state.products.find((item) => item.title === this.form.title);
+      } else {
+        this.msg.title = 'Поле не может быть пустым';
+      }
 
-          if (exist) {
-            this.errorList.title.value = true;
-          } else {
-            this.errorList.title.value = false;
-          }
+      this.isValid('title');
+    },
+
+    validateImg(val) {
+      this.requiredVal(val, 'img');
+      if (val !== '') {
+        if (
+          /(https?:\/\/)[\w\-~]+(\.[\w\-~]+)+(\/[\w\-~]*)*(#[\w\\-]*)?(\?.*)?(\.(jpg|png|webp|gif|jpeg))/gi.test(
+            val,
+          )
+        ) {
+          this.msg.img = '';
+        } else {
+          this.msg.img = 'Введено некорректное значение';
         }
-      });
+      } else {
+        this.msg.img = 'Поле не может быть пустым';
+      }
+
+      this.isValid('img');
+    },
+
+    validatePrice(val) {
+      this.requiredVal(val, 'price');
+      this.form.price = this.form.price.replace(/[^0-9]/g, '');
+      this.form.price = this.form.price.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+      this.isValid('price');
+    },
+
+    requiredVal(val, data) {
+      if (val === '') {
+        this.msg[data] = 'Поле не может быть пустым';
+      } else {
+        this.msg[data] = '';
+      }
+    },
+
+    isValid(data) {
+      if (this.form[data] !== '' && this.msg[data] === '') {
+        this.inValidObj[data] = false;
+      }
 
       this.validation();
     },
 
     validation() {
-      const values = Object.values(this.errorList);
+      const values = Object.values(this.inValidObj);
       console.log(values);
-      const arr = [];
-      // eslint-disable-next-line no-restricted-syntax
-      for (const value of values) {
-        const val = Object.values(value);
-        arr.push(...val);
-      }
+      const arr = [...values];
 
       if (arr.includes(true, 0)) {
         this.invalidForm = true;
@@ -166,6 +163,7 @@ export default {
         this.invalidForm = false;
       }
     },
+
     onSubmit() {
       const price = Number(this.form.price.replace(/\s/g, ''));
       this.$store.commit('addProduct', {
@@ -174,42 +172,33 @@ export default {
         img: this.form.img,
         price,
       });
-      this.form.title = '';
-      this.form.text = '';
-      this.form.img = '';
-      this.form.price = '';
+
+      Object.keys(this.form).forEach((key) => {
+        this.form[key] = '';
+      });
+
+      this.invalidForm = true;
+
+      Object.keys(this.inValidObj).forEach((key) => {
+        this.inValidObj[key] = true;
+      });
+
+      this.$emit('succeed', 'successModal');
     },
-  },
-  mounted() {
-    if (localStorage.title) {
-      this.form.title = localStorage.getItem('title');
-    }
-    if (localStorage.text) {
-      this.form.text = localStorage.getItem('text');
-    }
-    if (localStorage.img) {
-      this.form.img = localStorage.getItem('img');
-    }
-    if (localStorage.price) {
-      this.form.price = localStorage.getItem('price');
-    }
   },
   watch: {
-    'form.title': (val) => {
-      localStorage.setItem('title', val);
-      // this.isValid();
+    /* eslint-disable */
+    'form.title': function (val) {
+      // localStorage.setItem('title', val);
+      this.validateTitle(val);
     },
-    'form.text': (val) => {
-      localStorage.setItem('text', val);
-      // this.isValid();
+    'form.img': function (val) {
+      // localStorage.setItem('img', val);
+      this.validateImg(val);
     },
-    'form.img': (val) => {
-      localStorage.setItem('img', val);
-      // this.isValid();
-    },
-    'form.price': (val) => {
-      localStorage.setItem('price', val);
-      // this.isValid();
+    'form.price': function (val) {
+      // localStorage.setItem('price', val);
+      this.validatePrice(val);
     },
   },
 };

@@ -1,6 +1,14 @@
 <template>
   <div id="app">
-    <AddNewItem />
+    <transition name="fade">
+      <Modal
+        v-if="isOpenModal"
+        :open-target="openTarget"
+        :params="params"
+        @close="closeModal"
+      />
+    </transition>
+    <AddNewItem @succeed="openModal" />
     <div class="main">
       <ItemsSort :item-sort.sync="itemSort" :sorting-list="sorting" />
       <ItemsList :products="products" />
@@ -9,6 +17,8 @@
 </template>
 
 <script>
+import eventBus from '@/eventBus';
+import Modal from './components/Modal.vue';
 import AddNewItem from './components/AddNewItem.vue';
 import ItemsSort from './components/ItemsSort.vue';
 import ItemsList from './components/ItemsList.vue';
@@ -16,11 +26,15 @@ import ItemsList from './components/ItemsList.vue';
 export default {
   name: 'App',
   components: {
+    Modal,
     AddNewItem,
     ItemsList,
     ItemsSort,
   },
   data: () => ({
+    isOpenModal: false,
+    openTarget: '',
+    params: {},
     itemSort: 'По умолчанию',
     sorting: ['По возрастанию цены', 'По убыванию цены', 'По наименованию'],
   }),
@@ -29,7 +43,22 @@ export default {
       return this.sort(this.$store.state.products);
     },
   },
+  created() {
+    eventBus.$on('deleteProduct', (productTitle) => {
+      this.openModal('confirmDelete', productTitle);
+    });
+  },
   methods: {
+    closeModal() {
+      this.isOpenModal = false;
+      document.querySelector('body').style.overflow = this.isOpenModal ? 'hidden' : 'auto';
+    },
+    openModal(target, params) {
+      console.log(target);
+      this.openTarget = target;
+      this.isOpenModal = true;
+      this.params = params;
+    },
     sort(arr) {
       const sortProducts = arr;
       function byField(field) {
