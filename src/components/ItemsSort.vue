@@ -1,6 +1,12 @@
 <template>
-  <div class="select-custom" id="item-sort">
-    <div class="select__header" @click="openSelect">
+  <div
+    class="select-custom"
+    :class="{ 'is-active': isOpenSelect === true }"
+    id="item-sort"
+    @mouseenter="openSelect"
+    @mouseleave="closeSelect"
+  >
+    <div class="select__header">
       <span class="select__current select-placeholder">
         {{ currentItemSort }}
       </span>
@@ -42,37 +48,19 @@ export default {
     isOpenSelect: false,
     currentItemSort: null,
   }),
-  computed: {
-    // priceComputed() {
-    //   return this.product.price.toLocaleString('ru-RU');
-    // },
-  },
+  computed: {},
   methods: {
     pickSort(e) {
       this.currentItemSort = e.target.innerText;
-      e.target.parentElement.parentElement.classList.remove('is-active');
       this.$emit('update:itemSort', this.currentItemSort);
-      this.isTrue();
+      this.isOpenSelect = false;
     },
-    isTrue() {
-      if (this.isOpenSelect === false) {
-        this.isOpenSelect = true;
-      } else {
-        this.isOpenSelect = false;
-      }
-    },
-    openSelect(e) {
-      const select = e.target;
-      this.isTrue();
 
-      if (select.classList.contains('select__header')) {
-        select.parentElement.classList.toggle('is-active');
-        select.querySelector('.select__current').classList.remove('select-placeholder');
-      } else {
-        const selectParent = select.closest('.select__header');
-        selectParent.parentElement.classList.toggle('is-active');
-        selectParent.querySelector('.select__current').classList.remove('select-placeholder');
-      }
+    openSelect() {
+      this.isOpenSelect = true;
+    },
+    closeSelect() {
+      this.isOpenSelect = false;
     },
   },
   created() {
@@ -159,8 +147,9 @@ export default {
     border-radius: 4px;
     width: 160px;
     position: absolute;
-    top: 40px;
+    top: 38px;
     text-align: right;
+    z-index: 10;
   }
 
   &__item {
