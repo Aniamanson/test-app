@@ -1,4 +1,5 @@
 # test-app
+simple manager bord for adding product cards
 https://aniamanson.github.io/test-app/
 
 ## Project setup
